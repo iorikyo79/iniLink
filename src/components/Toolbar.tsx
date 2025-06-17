@@ -30,6 +30,7 @@ interface ToolbarProps {
   canRedo: boolean;
   hasData: boolean;
   isDirty: boolean;
+  isSharedFile?: boolean;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   validationSummary?: ValidationSummary;
@@ -47,12 +48,17 @@ export function Toolbar({
   canRedo,
   hasData,
   isDirty,
+  isSharedFile = false,
   searchQuery,
   onSearchChange,
   validationSummary,
 }: ToolbarProps) {
   const hasValidationIssues = validationSummary && (validationSummary.errorCount > 0 || validationSummary.warningCount > 0);
   const hasCriticalIssues = validationSummary && validationSummary.criticalIssues.length > 0;
+
+  // Save button should be enabled if:
+  // 1. Has data AND (has changes OR is a shared file) AND no critical issues
+  const canSave = hasData && (isDirty || isSharedFile) && !hasCriticalIssues;
 
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-3">
@@ -68,12 +74,18 @@ export function Toolbar({
           
           <button
             onClick={onSave}
-            disabled={!hasData || !isDirty || hasCriticalIssues}
+            disabled={!canSave}
             className="flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            title={hasCriticalIssues ? 'Cannot save: Critical validation errors present' : ''}
+            title={
+              hasCriticalIssues 
+                ? 'Cannot save: Critical validation errors present' 
+                : isSharedFile && !isDirty
+                  ? 'Download shared configuration'
+                  : 'Save changes'
+            }
           >
             <Download size={16} />
-            <span>Save</span>
+            <span>{isSharedFile && !isDirty ? 'Download' : 'Save'}</span>
           </button>
           
           <button
@@ -148,6 +160,13 @@ export function Toolbar({
             </div>
           )}
 
+          {/* Status indicators */}
+          {isSharedFile && !isDirty && (
+            <span className="text-sm text-blue-600 font-medium">
+              Shared file ready to download
+            </span>
+          )}
+          
           {isDirty && (
             <span className="text-sm text-orange-600 font-medium">
               Unsaved changes

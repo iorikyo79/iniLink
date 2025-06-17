@@ -43,6 +43,9 @@ function App() {
     url: '',
     length: 0
   });
+  
+  // Track if the current file was loaded from a share URL
+  const [isSharedFile, setIsSharedFile] = React.useState(false);
 
   // Check for shared configuration on app load
   useEffect(() => {
@@ -60,6 +63,9 @@ function App() {
           
           await loadFile(syntheticFile);
           
+          // Mark this as a shared file so Save button is enabled
+          setIsSharedFile(true);
+          
           // Clear the URL parameter to clean up the address bar
           clearShareUrl();
           
@@ -74,17 +80,17 @@ function App() {
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
-              <span>Shared configuration loaded successfully!</span>
+              <span>Shared configuration loaded successfully! You can now review and download it.</span>
             </div>
           `;
           document.body.appendChild(notification);
           
-          // Remove notification after 3 seconds
+          // Remove notification after 4 seconds
           setTimeout(() => {
             if (document.body.contains(notification)) {
               document.body.removeChild(notification);
             }
-          }, 3000);
+          }, 4000);
         }
       } catch (error) {
         console.error('Failed to load shared configuration:', error);
@@ -101,6 +107,7 @@ function App() {
   const handleFileUpload = async (file: File) => {
     try {
       setError(null);
+      setIsSharedFile(false); // Reset shared file flag when uploading a new file
       await loadFile(file);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load file');
@@ -198,6 +205,7 @@ function App() {
         canRedo={canRedo}
         hasData={!!state.data}
         isDirty={state.isDirty}
+        isSharedFile={isSharedFile}
         searchQuery={state.searchQuery}
         onSearchChange={setSearchQuery}
         validationSummary={validationSummary}
@@ -232,6 +240,24 @@ function App() {
               <p className="text-sm text-red-800">
                 <strong>Critical Issues Found:</strong> {validationSummary.criticalIssues.length} critical validation error{validationSummary.criticalIssues.length !== 1 ? 's' : ''} detected. 
                 Please review and fix these issues before saving.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shared file notification banner */}
+      {isSharedFile && (
+        <div className="bg-blue-100 border-l-4 border-blue-500 p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-800">
+                <strong>Shared Configuration:</strong> This file was loaded from a shared link. You can review, edit, and download it directly.
               </p>
             </div>
           </div>
