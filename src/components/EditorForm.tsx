@@ -117,7 +117,7 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
               <span className="font-medium text-gray-700">Type:</span>
               <p className="text-gray-900 capitalize">
                 {selectedKey.type}
-                {selectedKey.type === 'boolean' && ' (true/false/1/0/yes/no/on/off)'}
+                {selectedKey.type === 'boolean' && ' (True/TRUE/T, No/NO/N, yes/no, on/off)'}
               </p>
             </div>
             <div>
@@ -187,10 +187,12 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
                 error || hasErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
             >
-              <option value="true">true</option>
-              <option value="false">false</option>
-              <option value="1">1</option>
-              <option value="0">0</option>
+              <option value="True">True</option>
+              <option value="TRUE">TRUE</option>
+              <option value="T">T</option>
+              <option value="No">No</option>
+              <option value="NO">NO</option>
+              <option value="N">N</option>
               <option value="yes">yes</option>
               <option value="no">no</option>
               <option value="on">on</option>
@@ -250,10 +252,10 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
           <h4 className="text-sm font-medium text-blue-800 mb-2">Value Type Guidelines:</h4>
           <div className="text-xs text-blue-700 space-y-1">
             {selectedKey.type === 'boolean' && (
-              <p><strong>Boolean:</strong> Accepts true/false, 1/0, yes/no, on/off</p>
+              <p><strong>Boolean:</strong> Accepts True/TRUE/T, No/NO/N, yes/no, on/off</p>
             )}
             {selectedKey.type === 'number' && (
-              <p><strong>Number:</strong> Must be a valid finite number</p>
+              <p><strong>Number:</strong> Must be a valid finite number (including 0 and 1)</p>
             )}
             {selectedKey.type === 'string' && (
               <p><strong>String:</strong> Any text value (avoid line breaks)</p>

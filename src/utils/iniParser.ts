@@ -284,10 +284,10 @@ function validateValueType(value: string, type: 'string' | 'number' | 'boolean',
   switch (type) {
     case 'boolean':
       const boolValue = value.toLowerCase();
-      if (!['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'].includes(boolValue)) {
+      if (!['true', 'false', 'yes', 'no', 'on', 'off', 't', 'n'].includes(boolValue)) {
         return {
           type: 'invalid_value',
-          message: `Invalid boolean value "${value}" for key "${keyName}". Expected: true/false, 1/0, yes/no, on/off`,
+          message: `Invalid boolean value "${value}" for key "${keyName}". Expected: True/TRUE/T, No/NO/N, yes/no, on/off`,
           section: sectionName,
           key: keyName,
           severity: 'error'
@@ -409,12 +409,23 @@ function inferType(value: any): 'string' | 'number' | 'boolean' {
   if (typeof value === 'boolean') return 'boolean';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'string') {
-    const lowerValue = value.toLowerCase();
-    // Extended boolean detection
-    if (['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'].includes(lowerValue)) {
+    const trimmedValue = value.trim();
+    
+    // Check for specific boolean values first (case-insensitive)
+    const lowerValue = trimmedValue.toLowerCase();
+    if (['true', 'yes', 'on', 't'].includes(lowerValue) || 
+        ['no', 'n'].includes(lowerValue)) {
       return 'boolean';
     }
-    if (!isNaN(Number(value)) && value.trim() !== '' && isFinite(Number(value))) {
+    
+    // Check for uppercase boolean values
+    const upperValue = trimmedValue.toUpperCase();
+    if (['TRUE', 'NO', 'T', 'N'].includes(upperValue)) {
+      return 'boolean';
+    }
+    
+    // Check for numbers (including 0 and 1, but treat them as numbers)
+    if (!isNaN(Number(trimmedValue)) && trimmedValue !== '' && isFinite(Number(trimmedValue))) {
       return 'number';
     }
   }
@@ -425,7 +436,9 @@ function parseValue(value: string, type: 'string' | 'number' | 'boolean'): any {
   switch (type) {
     case 'boolean':
       const lowerValue = value.toLowerCase();
-      return ['true', '1', 'yes', 'on'].includes(lowerValue);
+      const upperValue = value.toUpperCase();
+      return ['true', 'yes', 'on', 't'].includes(lowerValue) || 
+             ['TRUE', 'T'].includes(upperValue);
     case 'number':
       return Number(value);
     default:
@@ -436,9 +449,11 @@ function parseValue(value: string, type: 'string' | 'number' | 'boolean'): any {
 export function validateValue(value: string, type: 'string' | 'number' | 'boolean'): string | null {
   switch (type) {
     case 'boolean':
-      const boolValue = value.toLowerCase();
-      if (!['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'].includes(boolValue)) {
-        return 'Boolean values must be: true/false, 1/0, yes/no, or on/off';
+      const lowerValue = value.toLowerCase();
+      const upperValue = value.toUpperCase();
+      if (!['true', 'yes', 'no', 'on', 'off', 't', 'n'].includes(lowerValue) &&
+          !['TRUE', 'NO', 'T', 'N'].includes(upperValue)) {
+        return 'Boolean values must be: True/TRUE/T, No/NO/N, yes/no, or on/off';
       }
       break;
     case 'number':
