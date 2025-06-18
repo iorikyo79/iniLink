@@ -44,8 +44,7 @@ export class FileProcessor {
         case 'json':
           return parseJsonContent(content, filename);
         case 'xml':
-          // XML parsing is async, so we await it
-          return await parseXmlContent(content, filename);
+          return parseXmlContent(content, filename);
         default:
           throw new Error(`Unsupported file type: ${fileType}`);
       }
