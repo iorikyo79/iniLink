@@ -1,8 +1,8 @@
-# INI File Editor
+# ConfigLink
 
 A professional web-based INI file editor with advanced features including change tracking, validation, sharing capabilities, and real-time editing.
 
-![INI File Editor](https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1200&h=400&fit=crop)
+![ConfigLink](https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1200&h=400&fit=crop)
 
 ## ✨ Features
 
@@ -36,6 +36,12 @@ A professional web-based INI file editor with advanced features including change
 - **Type Validation**: Ensure values match their expected types
 - **Error Reporting**: Detailed error messages with line numbers
 
+### 📱 Mobile Responsive
+- **Touch-Friendly UI**: Optimized for mobile devices with proper touch targets
+- **Collapsible Sidebar**: Mobile-friendly navigation with hamburger menu
+- **Smooth Scrolling**: Auto-scroll to inputs on mobile for better UX
+- **Responsive Design**: Adapts to all screen sizes from mobile to desktop
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -47,7 +53,7 @@ A professional web-based INI file editor with advanced features including change
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd ini-file-editor
+   cd configlink
    ```
 
 2. **Install dependencies**
@@ -99,6 +105,11 @@ The built files will be in the `dist` directory.
 - **Global Search**: Use the toolbar search to find keys across all sections
 - **Section Filter**: Use the tree view filter to find specific sections
 - **Modified Filter**: Toggle "Show Modified Only" to focus on changes
+
+### Mobile Usage
+- **Hamburger Menu**: Tap the menu button to access the tree view on mobile
+- **Touch Navigation**: All buttons and inputs are optimized for touch
+- **Auto-scroll**: Inputs automatically scroll into view when focused
 
 ## 🛠️ Technical Details
 
@@ -214,6 +225,7 @@ If you encounter any issues or have questions:
 - **v1.0.0**: Initial release with core editing features
 - **v1.1.0**: Added sharing functionality and validation
 - **v1.2.0**: Enhanced search and filtering capabilities
+- **v1.3.0**: Mobile responsive design and touch optimization
 
 ---
 
