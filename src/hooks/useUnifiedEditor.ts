@@ -32,8 +32,6 @@ export function useUnifiedEditor() {
       
       // Detect file type and parse
       const fileType = fileProcessor.detectFileType(file);
-      
-      // Parse content (handle async XML parsing)
       const parsedContent = await fileProcessor.parseContent(sanitizedContent, fileType, file.name);
       
       // Create new state
@@ -55,7 +53,6 @@ export function useUnifiedEditor() {
         historyIndex: 0,
       }));
     } catch (error) {
-      console.error('파일 로딩 오류:', error);
       throw error;
     }
   }, [fileProcessor]);
@@ -293,12 +290,7 @@ export function useUnifiedEditor() {
 
   const exportData = useCallback(() => {
     if (!state.currentFile) return null;
-    try {
-      return fileProcessor.serializeContent(state.currentFile.content, state.currentFile.type);
-    } catch (error) {
-      console.error('데이터 내보내기 오류:', error);
-      throw error;
-    }
+    return fileProcessor.serializeContent(state.currentFile.content, state.currentFile.type);
   }, [state.currentFile, fileProcessor]);
 
   const reset = useCallback(() => {
@@ -316,12 +308,7 @@ export function useUnifiedEditor() {
 
   const validateCurrentFile = useCallback(() => {
     if (!state.currentFile) return [];
-    try {
-      return validationEngine.validateNode(state.currentFile.content);
-    } catch (error) {
-      console.error('파일 검증 오류:', error);
-      return [];
-    }
+    return validationEngine.validateNode(state.currentFile.content);
   }, [state.currentFile, validationEngine]);
 
   return {
