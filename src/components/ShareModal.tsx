@@ -61,20 +61,20 @@ export function ShareModal({ isOpen, onClose, shareUrl, urlLength }: ShareModalP
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Share2 className="text-blue-600" size={24} />
-            <h2 className="text-xl font-semibold text-gray-900">Share INI Configuration</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Share INI Configuration</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-gray-100"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {/* URL Status Indicator */}
           <div className={`p-4 rounded-lg border ${
             urlStatus.level === 'safe' ? 'bg-green-50 border-green-200' :
@@ -116,8 +116,8 @@ export function ShareModal({ isOpen, onClose, shareUrl, urlLength }: ShareModalP
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Shareable URL
             </label>
-            <div className="flex space-x-2">
-              <div className="flex-1 relative">
+            <div className="flex flex-col space-y-2">
+              <div className="relative">
                 <textarea
                   value={shareUrl}
                   readOnly
@@ -127,11 +127,11 @@ export function ShareModal({ isOpen, onClose, shareUrl, urlLength }: ShareModalP
               </div>
             </div>
             
-            <div className="flex space-x-2 mt-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
               <button
                 onClick={handleCopy}
                 disabled={copied || copyError}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-colors min-h-11 text-base ${
                   copied 
                     ? 'bg-green-100 text-green-800 border border-green-200'
                     : copyError
@@ -159,7 +159,7 @@ export function ShareModal({ isOpen, onClose, shareUrl, urlLength }: ShareModalP
               
               <button
                 onClick={handleTestUrl}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center space-x-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-11 text-base"
               >
                 <ExternalLink size={16} />
                 <span>Test URL</span>
@@ -205,10 +205,10 @@ export function ShareModal({ isOpen, onClose, shareUrl, urlLength }: ShareModalP
           )}
         </div>
 
-        <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 p-4 sm:p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-11 text-base"
           >
             Close
           </button>

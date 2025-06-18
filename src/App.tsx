@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { Toolbar } from './components/Toolbar';
 import { FileUpload } from './components/FileUpload';
 import { TreeView } from './components/TreeView';
@@ -11,6 +12,8 @@ import { generateShareUrl, parseShareUrl, clearShareUrl, validateShareData } fro
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  
   const {
     state,
     loadFile,
@@ -46,6 +49,33 @@ function App() {
   
   // Track if the current file was loaded from a share URL
   const [isSharedFile, setIsSharedFile] = React.useState(false);
+
+  // Memoize validation summary for performance
+  const validationSummary = useMemo(() => {
+    return state.data?.validationErrors ? 
+      getValidationSummary(state.data.validationErrors) : 
+      { errorCount: 0, warningCount: 0, criticalIssues: [] };
+  }, [state.data?.validationErrors]);
+
+  // Close mobile sidebar when clicking outside or selecting a key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isMobileSidebarOpen && !target.closest('.mobile-sidebar') && !target.closest('.mobile-menu-button')) {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMobileSidebarOpen]);
+
+  // Close mobile sidebar when a key is selected
+  useEffect(() => {
+    if (state.selectedKey) {
+      setIsMobileSidebarOpen(false);
+    }
+  }, [state.selectedKey]);
 
   // Check for shared configuration on app load
   useEffect(() => {
@@ -168,20 +198,11 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Get validation summary
-  const validationSummary = state.data?.validationErrors ? 
-    getValidationSummary(state.data.validationErrors) : 
-    { errorCount: 0, warningCount: 0, criticalIssues: [] };
-
-  // Close menus when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = () => {
-      // This will be handled by the TreeView component internally
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  const handleKeySelect = (key: any) => {
+    selectKey(key);
+    // Auto-close mobile sidebar when key is selected
+    setIsMobileSidebarOpen(false);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -209,6 +230,8 @@ function App() {
         searchQuery={state.searchQuery}
         onSearchChange={setSearchQuery}
         validationSummary={validationSummary}
+        onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        isMobileSidebarOpen={isMobileSidebarOpen}
       />
       
       {error && (
@@ -219,9 +242,9 @@ function App() {
             </div>
             <button
               onClick={() => setError(null)}
-              className="ml-auto text-red-400 hover:text-red-600"
+              className="ml-auto text-red-400 hover:text-red-600 min-h-11 min-w-11 flex items-center justify-center"
             >
-              ×
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -264,21 +287,38 @@ function App() {
         </div>
       )}
       
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {!state.data ? (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <FileUpload onFileUpload={handleFileUpload} className="max-w-md" />
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+            <FileUpload onFileUpload={handleFileUpload} className="max-w-md w-full" />
           </div>
         ) : (
           <>
+            {/* Mobile Sidebar Overlay */}
+            {isMobileSidebarOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden" />
+            )}
+
             {/* Left Sidebar - Tree View */}
-            <div className="w-80 flex-shrink-0">
+            <div className={`
+              mobile-sidebar
+              ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              sm:translate-x-0
+              fixed sm:relative
+              top-0 left-0
+              w-80 sm:w-80
+              h-full sm:h-auto
+              flex-shrink-0
+              transition-transform duration-300 ease-in-out
+              z-50 sm:z-auto
+              bg-white sm:bg-transparent
+            `}>
               <TreeView
                 sections={state.data.sections}
                 selectedKey={state.selectedKey}
                 searchQuery={state.searchQuery}
                 validationErrors={state.data.validationErrors}
-                onKeySelect={selectKey}
+                onKeySelect={handleKeySelect}
                 onToggleSection={toggleSection}
                 onAddSection={addSection}
                 onDeleteSection={deleteSection}
@@ -290,13 +330,13 @@ function App() {
             </div>
             
             {/* Main Content */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
               {/* Tab Navigation */}
               <div className="border-b border-gray-200 bg-white">
-                <nav className="flex space-x-8 px-4">
+                <nav className="flex space-x-4 sm:space-x-8 px-4 overflow-x-auto">
                   <button
                     onClick={() => setActiveTab('editor')}
-                    className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    className={`py-3 px-1 border-b-2 font-medium text-sm sm:text-base transition-colors whitespace-nowrap min-h-11 ${
                       activeTab === 'editor'
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -316,7 +356,7 @@ function App() {
                   </button>
                   <button
                     onClick={() => setActiveTab('changes')}
-                    className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    className={`py-3 px-1 border-b-2 font-medium text-sm sm:text-base transition-colors whitespace-nowrap min-h-11 ${
                       activeTab === 'changes'
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -328,7 +368,7 @@ function App() {
               </div>
               
               {/* Tab Content */}
-              <div className="flex-1">
+              <div className="flex-1 overflow-hidden">
                 {activeTab === 'editor' ? (
                   <EditorForm
                     selectedKey={state.selectedKey}

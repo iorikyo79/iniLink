@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, X, AlertCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { IniKey, ValidationError } from '../types/ini';
 import { validateValue } from '../utils/iniParser';
@@ -14,12 +14,24 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
   const [value, setValue] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const valueInputRef = useRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (selectedKey) {
       setValue(selectedKey.value);
       setComment(selectedKey.comment || '');
       setError(null);
+      
+      // Scroll input into view on mobile with smooth animation
+      setTimeout(() => {
+        if (valueInputRef.current && window.innerWidth < 640) {
+          valueInputRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }, 100);
     }
   }, [selectedKey]);
 
@@ -62,10 +74,10 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
 
   if (!selectedKey) {
     return (
-      <div className="bg-white h-full flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="text-lg font-medium mb-2">No key selected</p>
-          <p>Select a key from the tree view to edit its value</p>
+      <div className="bg-white h-full flex items-center justify-center p-4">
+        <div className="text-center text-gray-500 max-w-md">
+          <p className="text-base sm:text-lg font-medium mb-2">No key selected</p>
+          <p className="text-sm sm:text-base">Select a key from the tree view to edit its value</p>
         </div>
       </div>
     );
@@ -79,7 +91,7 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-lg font-semibold text-gray-900">Edit Key</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Edit Key</h2>
             {hasErrors && (
               <div className="flex items-center space-x-1">
                 {getErrorIcon('error')}
@@ -95,7 +107,7 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
           </div>
           <button
             onClick={onCancel}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-gray-100"
           >
             <X size={20} />
           </button>
@@ -104,25 +116,29 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
       
       <div className="flex-1 p-4 space-y-6 overflow-y-auto">
         <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700">Section:</span>
-              <p className="text-gray-900">{selectedKey.section || 'Root'}</p>
+              <p className="text-gray-900 text-base">{selectedKey.section || 'Root'}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Key:</span>
-              <p className="text-gray-900">{selectedKey.key}</p>
+              <p className="text-gray-900 text-base break-all">{selectedKey.key}</p>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <span className="font-medium text-gray-700">Type:</span>
-              <p className="text-gray-900 capitalize">
+              <p className="text-gray-900 capitalize text-base">
                 {selectedKey.type}
-                {selectedKey.type === 'boolean' && ' (True/TRUE/T, No/NO/N, yes/no, on/off)'}
+                {selectedKey.type === 'boolean' && (
+                  <span className="text-sm text-gray-600 block sm:inline sm:ml-2">
+                    (True/TRUE/T, No/NO/N, yes/no, on/off)
+                  </span>
+                )}
               </p>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <span className="font-medium text-gray-700">Original:</span>
-              <p className="text-gray-900 font-mono text-xs break-all">
+              <p className="text-gray-900 font-mono text-sm break-all bg-white p-2 rounded border mt-1">
                 {selectedKey.originalValue}
               </p>
             </div>
@@ -181,9 +197,10 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
           </label>
           {selectedKey.type === 'boolean' ? (
             <select
+              ref={valueInputRef as React.RefObject<HTMLSelectElement>}
               value={value}
               onChange={(e) => handleValueChange(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-h-11 ${
                 error || hasErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
             >
@@ -200,13 +217,15 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
             </select>
           ) : (
             <input
+              ref={valueInputRef as React.RefObject<HTMLInputElement>}
               type={selectedKey.type === 'number' ? 'number' : 'text'}
               value={value}
               onChange={(e) => handleValueChange(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-h-11 ${
                 error || hasErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
               placeholder={`Enter ${selectedKey.type} value`}
+              inputMode={selectedKey.type === 'number' ? 'numeric' : 'text'}
             />
           )}
           {error && (
@@ -226,7 +245,7 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             placeholder="Add a comment about this change..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+            className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-base min-h-20"
           />
         </div>
         
@@ -264,19 +283,19 @@ export function EditorForm({ selectedKey, validationErrors = [], onSave, onCance
         </div>
       </div>
       
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex space-x-3">
+      <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             onClick={handleSave}
             disabled={!!error}
-            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors min-h-11 text-base"
           >
             <Save size={16} />
             <span>Save Changes</span>
           </button>
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-11 text-base"
           >
             Cancel
           </button>

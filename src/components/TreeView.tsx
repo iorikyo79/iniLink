@@ -285,12 +285,12 @@ export function TreeView({
 
   return (
     <div className="bg-white border-r border-gray-200 h-full overflow-y-auto">
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-2 sm:p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">INI Structure</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">INI Structure</h2>
           <button
             onClick={() => setShowAddSection(true)}
-            className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors min-h-11 min-w-11 flex items-center justify-center"
             title="Add Section"
           >
             <Plus size={16} />
@@ -302,7 +302,7 @@ export function TreeView({
           <div className="mb-3">
             <button
               onClick={() => setShowModifiedOnly(!showModifiedOnly)}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full min-h-11 ${
                 showModifiedOnly
                   ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
                   : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
@@ -338,12 +338,12 @@ export function TreeView({
             placeholder="Filter sections..."
             value={localSearchQuery}
             onChange={(e) => setLocalSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 min-h-11 text-base"
           />
           {localSearchQuery && (
             <button
               onClick={() => setLocalSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center min-h-11 min-w-11"
             >
               <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
             </button>
@@ -404,7 +404,7 @@ export function TreeView({
                 </>
               )}
             </div>
-            <div className="flex space-x-2 mt-1">
+            <div className="flex flex-wrap gap-2 mt-1">
               {localSearchQuery && (
                 <button
                   onClick={() => setLocalSearchQuery('')}
@@ -432,14 +432,14 @@ export function TreeView({
               value={newSectionName}
               onChange={(e) => setNewSectionName(e.target.value)}
               placeholder="Section name"
-              className="w-full px-2 py-1 text-sm border border-blue-200 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1 text-sm border border-blue-200 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-11 text-base"
               onKeyPress={(e) => e.key === 'Enter' && handleAddSection()}
               autoFocus
             />
             <div className="flex space-x-2 mt-2">
               <button
                 onClick={handleAddSection}
-                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors min-h-11"
               >
                 Add
               </button>
@@ -448,7 +448,7 @@ export function TreeView({
                   setShowAddSection(false);
                   setNewSectionName('');
                 }}
-                className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+                className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors min-h-11"
               >
                 Cancel
               </button>
@@ -475,7 +475,7 @@ export function TreeView({
                       type="text"
                       value={editingSectionName}
                       onChange={(e) => setEditingSectionName(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-11 text-base"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') handleSaveEditSection();
                         if (e.key === 'Escape') handleCancelEditSection();
@@ -484,14 +484,14 @@ export function TreeView({
                     />
                     <button
                       onClick={handleSaveEditSection}
-                      className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
+                      className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors min-h-11 min-w-11 flex items-center justify-center"
                       title="Save"
                     >
                       <Check size={14} />
                     </button>
                     <button
                       onClick={handleCancelEditSection}
-                      className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                      className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors min-h-11 min-w-11 flex items-center justify-center"
                       title="Cancel"
                     >
                       <X size={14} />
@@ -500,7 +500,7 @@ export function TreeView({
                 ) : (
                   <button
                     onClick={() => onToggleSection(result.section.name)}
-                    className={`flex items-center space-x-2 flex-1 p-2 text-left hover:bg-gray-50 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-2 flex-1 p-2 text-left hover:bg-gray-50 rounded-lg transition-colors min-h-11 ${
                       result.sectionMatches ? 'bg-yellow-50' : ''
                     } ${
                       hasErrors ? 'bg-red-50 border-l-4 border-red-400' : 
@@ -517,7 +517,7 @@ export function TreeView({
                     ) : (
                       <Folder size={16} className="text-blue-600" />
                     )}
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">
                       {highlightText(result.section.name, effectiveQuery)} ({result.matchedKeys.length})
                     </span>
                     {result.sectionMatches && effectiveQuery && (
@@ -554,7 +554,7 @@ export function TreeView({
                   <div className="relative">
                     <button
                       onClick={() => setSectionMenuOpen(sectionMenuOpen === result.section.name ? null : result.section.name)}
-                      className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity min-h-11 min-w-11 flex items-center justify-center"
                     >
                       <MoreVertical size={14} />
                     </button>
@@ -566,21 +566,21 @@ export function TreeView({
                             setShowAddKey(result.section.name);
                             setSectionMenuOpen(null);
                           }}
-                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 min-h-11"
                         >
                           <Plus size={14} />
                           <span>Add Key</span>
                         </button>
                         <button
                           onClick={() => handleStartEditSection(result.section.name)}
-                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 min-h-11"
                         >
                           <Edit2 size={14} />
                           <span>Rename</span>
                         </button>
                         <button
                           onClick={() => handleDeleteSection(result.section.name)}
-                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 min-h-11"
                         >
                           <Trash2 size={14} />
                           <span>Delete</span>
@@ -616,19 +616,19 @@ export function TreeView({
                       value={newKeyData.key}
                       onChange={(e) => setNewKeyData(prev => ({ ...prev, key: e.target.value }))}
                       placeholder="Key name"
-                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-11 text-base"
                     />
                     <input
                       type="text"
                       value={newKeyData.value}
                       onChange={(e) => setNewKeyData(prev => ({ ...prev, value: e.target.value }))}
                       placeholder="Value"
-                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-11 text-base"
                     />
                     <select
                       value={newKeyData.type}
                       onChange={(e) => setNewKeyData(prev => ({ ...prev, type: e.target.value as 'string' | 'number' | 'boolean' }))}
-                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-green-200 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-11 text-base"
                     >
                       <option value="string">String</option>
                       <option value="number">Number</option>
@@ -638,7 +638,7 @@ export function TreeView({
                   <div className="flex space-x-2 mt-2">
                     <button
                       onClick={() => handleAddKey(result.section.name)}
-                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                      className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors min-h-11"
                     >
                       Add
                     </button>
@@ -647,7 +647,7 @@ export function TreeView({
                         setShowAddKey(null);
                         setNewKeyData({ key: '', value: '', type: 'string' });
                       }}
-                      className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+                      className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors min-h-11"
                     >
                       Cancel
                     </button>
@@ -681,7 +681,7 @@ export function TreeView({
                                 type="text"
                                 value={editingKeyName}
                                 onChange={(e) => setEditingKeyName(e.target.value)}
-                                className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-11 text-base"
                                 onKeyPress={(e) => {
                                   if (e.key === 'Enter') handleSaveEditKey(result.section.name, key.key);
                                   if (e.key === 'Escape') handleCancelEditKey();
@@ -690,14 +690,14 @@ export function TreeView({
                               />
                               <button
                                 onClick={() => handleSaveEditKey(result.section.name, key.key)}
-                                className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
+                                className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors min-h-11 min-w-11 flex items-center justify-center"
                                 title="Save"
                               >
                                 <Check size={12} />
                               </button>
                               <button
                                 onClick={handleCancelEditKey}
-                                className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors min-h-11 min-w-11 flex items-center justify-center"
                                 title="Cancel"
                               >
                                 <X size={12} />
@@ -706,7 +706,7 @@ export function TreeView({
                           ) : (
                             <button
                               onClick={() => onKeySelect(key)}
-                              className={`flex items-center space-x-2 flex-1 p-2 text-left rounded-lg transition-colors ${
+                              className={`flex items-center space-x-2 flex-1 p-2 text-left rounded-lg transition-colors min-h-11 ${
                                 selectedKey?.key === key.key && selectedKey?.section === key.section
                                   ? 'bg-blue-100 border border-blue-200'
                                   : 'hover:bg-gray-50'
@@ -758,7 +758,7 @@ export function TreeView({
                           {!isEditingThisKey && (
                             <button
                               onClick={() => setKeyMenuOpen(keyMenuOpen === `${result.section.name}-${key.key}` ? null : `${result.section.name}-${key.key}`)}
-                              className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity min-h-11 min-w-11 flex items-center justify-center"
                             >
                               <MoreVertical size={12} />
                             </button>
@@ -768,14 +768,14 @@ export function TreeView({
                             <div className="absolute right-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-24">
                               <button
                                 onClick={() => handleStartEditKey(result.section.name, key.key)}
-                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 min-h-11"
                               >
                                 <Edit2 size={12} />
                                 <span>Rename</span>
                               </button>
                               <button
                                 onClick={() => handleDeleteKey(result.section.name, key.key)}
-                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 min-h-11"
                               >
                                 <Trash2 size={12} />
                                 <span>Delete</span>
@@ -828,7 +828,7 @@ export function TreeView({
               <Search size={24} className="mx-auto mb-2 text-gray-400" />
             )}
             <p className="text-lg font-medium mb-1">No results found</p>
-            <p className="text-sm">
+            <p className="text-sm px-4">
               {showModifiedOnly && !effectiveQuery ? 
                 'No modified items found' :
                 localSearchQuery ? 

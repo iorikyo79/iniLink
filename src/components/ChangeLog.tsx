@@ -9,10 +9,10 @@ interface ChangeLogProps {
 export function ChangeLog({ changes }: ChangeLogProps) {
   if (changes.length === 0) {
     return (
-      <div className="bg-white h-full flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="text-lg font-medium mb-2">No changes yet</p>
-          <p>Modifications will appear here</p>
+      <div className="bg-white h-full flex items-center justify-center p-4">
+        <div className="text-center text-gray-500 max-w-md">
+          <p className="text-base sm:text-lg font-medium mb-2">No changes yet</p>
+          <p className="text-sm sm:text-base">Modifications will appear here</p>
         </div>
       </div>
     );
@@ -62,7 +62,7 @@ export function ChangeLog({ changes }: ChangeLogProps) {
   return (
     <div className="bg-white h-full flex flex-col">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900">
           Change Log ({changes.length})
         </h2>
       </div>
@@ -73,29 +73,31 @@ export function ChangeLog({ changes }: ChangeLogProps) {
             key={change.id}
             className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <div className="flex items-center space-x-2 min-w-0 flex-1">
                 {getChangeIcon(change.type)}
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-gray-900 text-sm sm:text-base break-all">
                   {getChangeTitle(change)}
                 </span>
               </div>
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
+              <div className="flex items-center space-x-1 text-xs text-gray-500 flex-shrink-0">
                 <Clock size={12} />
-                <span>{change.timestamp.toLocaleString()}</span>
+                <span className="whitespace-nowrap">
+                  {change.timestamp.toLocaleString()}
+                </span>
               </div>
             </div>
             
-            <div className="text-sm text-gray-600 mb-2">
+            <div className="text-sm text-gray-600 mb-2 break-all">
               {getChangeDescription(change)}
             </div>
             
             {(change.type === 'modify' || change.type === 'add' || change.type === 'delete') && (
               <div className="space-y-2 text-sm">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {change.oldValue && (
                     <div>
-                      <span className="text-gray-600">Old Value:</span>
+                      <span className="text-gray-600 font-medium">Old Value:</span>
                       <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-1 break-all">
                         {change.oldValue}
                       </p>
@@ -103,7 +105,7 @@ export function ChangeLog({ changes }: ChangeLogProps) {
                   )}
                   {change.newValue && (
                     <div>
-                      <span className="text-gray-600">
+                      <span className="text-gray-600 font-medium">
                         {change.type === 'add' ? 'Value:' : 'New Value:'}
                       </span>
                       <p className={`font-mono text-xs p-2 rounded mt-1 break-all ${
@@ -121,7 +123,7 @@ export function ChangeLog({ changes }: ChangeLogProps) {
                       <MessageSquare size={14} className="text-blue-600" />
                       <span className="text-blue-800 font-medium">Comment</span>
                     </div>
-                    <p className="text-blue-700 text-sm">{change.comment}</p>
+                    <p className="text-blue-700 text-sm break-words">{change.comment}</p>
                   </div>
                 )}
               </div>

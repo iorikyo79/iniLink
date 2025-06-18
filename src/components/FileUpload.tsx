@@ -33,7 +33,7 @@ export function FileUpload({ onFileUpload, className = '' }: FileUploadProps) {
 
   return (
     <div
-      className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+      className={`border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-8 text-center transition-colors ${
         isDragOver ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'
       } ${className}`}
       onDrop={handleDrop}
@@ -44,20 +44,20 @@ export function FileUpload({ onFileUpload, className = '' }: FileUploadProps) {
       onDragLeave={() => setIsDragOver(false)}
     >
       <div className="flex flex-col items-center space-y-4">
-        <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full">
-          <FileText className="text-gray-600" size={32} />
+        <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full">
+          <FileText className="text-gray-600" size={24} />
         </div>
         
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
             Upload INI File
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-sm sm:text-base text-gray-600 mb-4 px-2">
             Drag and drop your INI file here, or click to browse
           </p>
         </div>
         
-        <label className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+        <label className="flex items-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors min-h-11 text-base">
           <Upload size={16} />
           <span>Choose File</span>
           <input

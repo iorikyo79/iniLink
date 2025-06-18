@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { EditorState, IniData, IniKey, IniChange } from '../types/ini';
 import { parseIniFile, serializeIniData } from '../utils/iniParser';
 
@@ -12,6 +12,9 @@ export function useIniEditor() {
     history: [],
     historyIndex: -1,
   });
+
+  // Memoize expensive operations
+  const memoizedState = useMemo(() => state, [state]);
 
   const loadFile = useCallback(async (file: File) => {
     try {
@@ -499,9 +502,9 @@ export function useIniEditor() {
   }, []);
 
   const exportData = useCallback(() => {
-    if (!state.data) return null;
-    return serializeIniData(state.data);
-  }, [state.data]);
+    if (!memoizedState.data) return null;
+    return serializeIniData(memoizedState.data);
+  }, [memoizedState.data]);
 
   const reset = useCallback(() => {
     setState({
@@ -516,7 +519,7 @@ export function useIniEditor() {
   }, []);
 
   return {
-    state,
+    state: memoizedState,
     loadFile,
     updateKey,
     addSection,
@@ -532,7 +535,7 @@ export function useIniEditor() {
     redo,
     exportData,
     reset,
-    canUndo: state.historyIndex > 0,
-    canRedo: state.historyIndex < state.history.length - 1,
+    canUndo: memoizedState.historyIndex > 0,
+    canRedo: memoizedState.historyIndex < memoizedState.history.length - 1,
   };
 }
