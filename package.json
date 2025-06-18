@@ -11,6 +11,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "events": "^3.3.0",
     "ini": "^4.1.1",
     "lz-string": "^1.5.0",
     "lucide-react": "^0.344.0",
