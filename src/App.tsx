@@ -65,12 +65,21 @@ function App() {
 
   // Validation summary
   const validationSummary = useMemo(() => {
-    const errors = validateCurrentFile();
-    return {
-      errorCount: errors.filter(e => e.severity === 'error').length,
-      warningCount: errors.filter(e => e.severity === 'warning').length,
-      criticalIssues: errors.filter(e => e.severity === 'error')
-    };
+    try {
+      const errors = validateCurrentFile();
+      return {
+        errorCount: errors.filter(e => e.severity === 'error').length,
+        warningCount: errors.filter(e => e.severity === 'warning').length,
+        criticalIssues: errors.filter(e => e.severity === 'error')
+      };
+    } catch (error) {
+      console.error('검증 요약 생성 오류:', error);
+      return {
+        errorCount: 0,
+        warningCount: 0,
+        criticalIssues: []
+      };
+    }
   }, [validateCurrentFile]);
 
   // Close mobile sidebar when clicking outside or selecting a node
@@ -117,7 +126,7 @@ function App() {
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
-              <span>Shared configuration loaded successfully!</span>
+              <span>공유된 구성 파일이 성공적으로 로드되었습니다!</span>
             </div>
           `;
           document.body.appendChild(notification);
@@ -129,8 +138,8 @@ function App() {
           }, 4000);
         }
       } catch (error) {
-        console.error('Failed to load shared configuration:', error);
-        setError(`Failed to load shared configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error('공유 구성 로드 실패:', error);
+        setError(`공유 구성 로드 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
         clearShareUrl();
       }
     };
@@ -144,7 +153,7 @@ function App() {
       setIsSharedFile(false);
       await loadFile(file);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load file');
+      setError(err instanceof Error ? err.message : '파일 로드 실패');
     }
   };
 
@@ -160,21 +169,25 @@ function App() {
   };
 
   const handleSave = () => {
-    const data = exportData();
-    if (data && state.currentFile) {
-      const blob = new Blob([data], { 
-        type: state.currentFile.type === 'json' ? 'application/json' :
-              state.currentFile.type === 'xml' ? 'application/xml' :
-              'text/plain'
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = state.currentFile.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    try {
+      const data = exportData();
+      if (data && state.currentFile) {
+        const blob = new Blob([data], { 
+          type: state.currentFile.type === 'json' ? 'application/json' :
+                state.currentFile.type === 'xml' ? 'application/xml' :
+                'text/plain'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = state.currentFile.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      setError(`파일 저장 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 
@@ -196,7 +209,7 @@ function App() {
         length
       });
     } catch (error) {
-      setError(`Failed to generate share URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(`공유 URL 생성 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 
@@ -214,23 +227,23 @@ function App() {
   };
 
   const generateChangeLog = (changes: any[]) => {
-    let log = `ConfigLink Change Log\n`;
-    log += `Generated: ${new Date().toISOString()}\n`;
-    log += `Total Changes: ${changes.length}\n\n`;
+    let log = `ConfigLink 변경 로그\n`;
+    log += `생성일: ${new Date().toISOString()}\n`;
+    log += `총 변경 사항: ${changes.length}\n\n`;
 
     changes.forEach((change, index) => {
       log += `${index + 1}. ${change.type.toUpperCase()}\n`;
-      log += `   Path: ${change.path}\n`;
-      log += `   Timestamp: ${change.timestamp.toISOString()}\n`;
+      log += `   경로: ${change.path}\n`;
+      log += `   시간: ${change.timestamp.toISOString()}\n`;
       
       if (change.oldValue !== null && change.oldValue !== undefined) {
-        log += `   Old Value: ${JSON.stringify(change.oldValue)}\n`;
+        log += `   이전 값: ${JSON.stringify(change.oldValue)}\n`;
       }
       if (change.newValue !== null && change.newValue !== undefined) {
-        log += `   New Value: ${JSON.stringify(change.newValue)}\n`;
+        log += `   새 값: ${JSON.stringify(change.newValue)}\n`;
       }
       if (change.comment) {
-        log += `   Comment: ${change.comment}\n`;
+        log += `   설명: ${change.comment}\n`;
       }
       log += '\n';
     });
@@ -300,7 +313,7 @@ function App() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-red-800">
-                <strong>Critical Issues Found:</strong> {validationSummary.criticalIssues.length} critical validation error{validationSummary.criticalIssues.length !== 1 ? 's' : ''} detected.
+                <strong>중요한 문제 발견:</strong> {validationSummary.criticalIssues.length}개의 중요한 검증 오류가 감지되었습니다.
               </p>
             </div>
           </div>
@@ -318,7 +331,7 @@ function App() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-blue-800">
-                <strong>Shared Configuration:</strong> This file was loaded from a shared link. You can review, edit, and download it directly.
+                <strong>공유된 구성 파일:</strong> 이 파일은 공유 링크에서 로드되었습니다. 검토, 편집 및 다운로드할 수 있습니다.
               </p>
             </div>
           </div>
@@ -378,7 +391,7 @@ function App() {
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    Editor
+                    편집기
                     {validationSummary.errorCount > 0 && (
                       <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         {validationSummary.errorCount}
@@ -398,7 +411,7 @@ function App() {
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    Changes ({state.changeHistory.length})
+                    변경 사항 ({state.changeHistory.length})
                   </button>
                 </nav>
               </div>

@@ -24,7 +24,6 @@ export class FileProcessor {
       case 'json':
         return 'json';
       case 'xml':
-      case 'config':
         return 'xml';
     }
 
@@ -44,7 +43,8 @@ export class FileProcessor {
         case 'json':
           return parseJsonContent(content, filename);
         case 'xml':
-          return parseXmlContent(content, filename);
+          // XML parsing is async, so we need to await it
+          return await parseXmlContent(content, filename);
         default:
           throw new Error(`Unsupported file type: ${fileType}`);
       }
@@ -75,7 +75,7 @@ export class FileProcessor {
     if (file.size > this.maxFileSize) {
       return {
         isValid: false,
-        error: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (${this.maxFileSize / 1024 / 1024}MB)`
+        error: `파일 크기 (${(file.size / 1024 / 1024).toFixed(2)}MB)가 최대 허용 크기 (${this.maxFileSize / 1024 / 1024}MB)를 초과합니다`
       };
     }
 
@@ -84,7 +84,7 @@ export class FileProcessor {
     if (!this.acceptedTypes.includes(extension)) {
       return {
         isValid: false,
-        error: `File type not supported. Accepted types: ${this.acceptedTypes.join(', ')}`
+        error: `지원되지 않는 파일 형식입니다. 지원 형식: ${this.acceptedTypes.join(', ')}`
       };
     }
 
