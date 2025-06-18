@@ -1,13 +1,12 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Toolbar } from './components/Toolbar';
-import { FileUpload } from './components/FileUpload';
-import { TreeView } from './components/TreeView';
-import { EditorForm } from './components/EditorForm';
-import { ChangeLog } from './components/ChangeLog';
+import { UnifiedFileUpload } from './components/UnifiedFileUpload';
+import { UnifiedTreeView } from './components/UnifiedTreeView';
+import { UnifiedEditorForm } from './components/UnifiedEditorForm';
+import { UnifiedChangeLog } from './components/UnifiedChangeLog';
 import { ShareModal } from './components/ShareModal';
-import { useIniEditor } from './hooks/useIniEditor';
-import { generateChangeLog, getValidationSummary, parseIniFile } from './utils/iniParser';
+import { useUnifiedEditor } from './hooks/useUnifiedEditor';
 import { generateShareUrl, parseShareUrl, clearShareUrl, validateShareData } from './utils/shareUtils';
 
 function App() {
@@ -17,23 +16,20 @@ function App() {
   const {
     state,
     loadFile,
-    updateKey,
-    addSection,
-    deleteSection,
-    renameSection,
-    addKey,
-    deleteKey,
-    renameKey,
-    selectKey,
+    updateNode,
+    addNode,
+    deleteNode,
+    selectNode,
     setSearchQuery,
-    toggleSection,
+    toggleExpanded,
     undo,
     redo,
     exportData,
     reset,
+    validateCurrentFile,
     canUndo,
     canRedo,
-  } = useIniEditor();
+  } = useUnifiedEditor();
 
   const [activeTab, setActiveTab] = React.useState<'editor' | 'changes'>('editor');
   const [error, setError] = React.useState<string | null>(null);
@@ -47,17 +43,37 @@ function App() {
     length: 0
   });
   
-  // Track if the current file was loaded from a share URL
   const [isSharedFile, setIsSharedFile] = React.useState(false);
 
-  // Memoize validation summary for performance
-  const validationSummary = useMemo(() => {
-    return state.data?.validationErrors ? 
-      getValidationSummary(state.data.validationErrors) : 
-      { errorCount: 0, warningCount: 0, criticalIssues: [] };
-  }, [state.data?.validationErrors]);
+  // Get selected node object
+  const selectedNodeObject = useMemo(() => {
+    if (!state.selectedNode || !state.currentFile) return null;
+    
+    function findNode(node: any, path: string): any {
+      if (node.path === path) return node;
+      if (node.children) {
+        for (const child of node.children) {
+          const found = findNode(child, path);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    
+    return findNode(state.currentFile.content, state.selectedNode);
+  }, [state.selectedNode, state.currentFile]);
 
-  // Close mobile sidebar when clicking outside or selecting a key
+  // Validation summary
+  const validationSummary = useMemo(() => {
+    const errors = validateCurrentFile();
+    return {
+      errorCount: errors.filter(e => e.severity === 'error').length,
+      warningCount: errors.filter(e => e.severity === 'warning').length,
+      criticalIssues: errors.filter(e => e.severity === 'error')
+    };
+  }, [validateCurrentFile]);
+
+  // Close mobile sidebar when clicking outside or selecting a node
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -70,12 +86,11 @@ function App() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMobileSidebarOpen]);
 
-  // Close mobile sidebar when a key is selected
   useEffect(() => {
-    if (state.selectedKey) {
+    if (state.selectedNode) {
       setIsMobileSidebarOpen(false);
     }
-  }, [state.selectedKey]);
+  }, [state.selectedNode]);
 
   // Check for shared configuration on app load
   useEffect(() => {
@@ -83,26 +98,18 @@ function App() {
       try {
         const shareData = parseShareUrl();
         if (shareData && validateShareData(shareData)) {
-          // Parse the shared INI data
-          const iniData = parseIniFile(shareData.data, shareData.filename);
-          
-          // Create a synthetic file object for the loadFile function
-          const syntheticFile = new File([shareData.data], shareData.filename, {
-            type: 'text/plain'
+          const syntheticFile = new File([shareData.content], shareData.filename, {
+            type: shareData.fileType === 'json' ? 'application/json' :
+                  shareData.fileType === 'xml' ? 'application/xml' :
+                  'text/plain'
           });
           
           await loadFile(syntheticFile);
-          
-          // Mark this as a shared file so Save button is enabled
           setIsSharedFile(true);
-          
-          // Clear the URL parameter to clean up the address bar
           clearShareUrl();
-          
-          // Show success message
           setError(null);
           
-          // Optional: Show a notification that shared config was loaded
+          // Show success notification
           const notification = document.createElement('div');
           notification.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
           notification.innerHTML = `
@@ -110,12 +117,11 @@ function App() {
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
-              <span>Shared configuration loaded successfully! You can now review and download it.</span>
+              <span>Shared configuration loaded successfully!</span>
             </div>
           `;
           document.body.appendChild(notification);
           
-          // Remove notification after 4 seconds
           setTimeout(() => {
             if (document.body.contains(notification)) {
               document.body.removeChild(notification);
@@ -125,8 +131,6 @@ function App() {
       } catch (error) {
         console.error('Failed to load shared configuration:', error);
         setError(`Failed to load shared configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        
-        // Clear the invalid URL parameter
         clearShareUrl();
       }
     };
@@ -137,7 +141,7 @@ function App() {
   const handleFileUpload = async (file: File) => {
     try {
       setError(null);
-      setIsSharedFile(false); // Reset shared file flag when uploading a new file
+      setIsSharedFile(false);
       await loadFile(file);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load file');
@@ -157,12 +161,16 @@ function App() {
 
   const handleSave = () => {
     const data = exportData();
-    if (data && state.data) {
-      const blob = new Blob([data], { type: 'text/plain' });
+    if (data && state.currentFile) {
+      const blob = new Blob([data], { 
+        type: state.currentFile.type === 'json' ? 'application/json' :
+              state.currentFile.type === 'xml' ? 'application/xml' :
+              'text/plain'
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = state.data.filename;
+      a.download = state.currentFile.filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -171,10 +179,17 @@ function App() {
   };
 
   const handleShare = () => {
-    if (!state.data) return;
+    if (!state.currentFile) return;
     
     try {
-      const { url, length } = generateShareUrl(state.data);
+      const shareData = {
+        version: '2.0',
+        fileType: state.currentFile.type,
+        content: exportData() || '',
+        filename: state.currentFile.filename
+      };
+      
+      const { url, length } = generateShareUrl(shareData as any);
       setShareModal({
         isOpen: true,
         url,
@@ -186,7 +201,7 @@ function App() {
   };
 
   const handleExportLog = () => {
-    const log = generateChangeLog(state.changes);
+    const log = generateChangeLog(state.changeHistory);
     const blob = new Blob([log], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -198,9 +213,33 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
-  const handleKeySelect = (key: any) => {
-    selectKey(key);
-    // Auto-close mobile sidebar when key is selected
+  const generateChangeLog = (changes: any[]) => {
+    let log = `ConfigLink Change Log\n`;
+    log += `Generated: ${new Date().toISOString()}\n`;
+    log += `Total Changes: ${changes.length}\n\n`;
+
+    changes.forEach((change, index) => {
+      log += `${index + 1}. ${change.type.toUpperCase()}\n`;
+      log += `   Path: ${change.path}\n`;
+      log += `   Timestamp: ${change.timestamp.toISOString()}\n`;
+      
+      if (change.oldValue !== null && change.oldValue !== undefined) {
+        log += `   Old Value: ${JSON.stringify(change.oldValue)}\n`;
+      }
+      if (change.newValue !== null && change.newValue !== undefined) {
+        log += `   New Value: ${JSON.stringify(change.newValue)}\n`;
+      }
+      if (change.comment) {
+        log += `   Comment: ${change.comment}\n`;
+      }
+      log += '\n';
+    });
+
+    return log;
+  };
+
+  const handleNodeSelect = (path: string) => {
+    selectNode(path);
     setIsMobileSidebarOpen(false);
   };
 
@@ -209,7 +248,7 @@ function App() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".ini,.txt"
+        accept=".ini,.json,.xml,.cfg,.conf,.config,.txt"
         onChange={handleFileInputChange}
         className="hidden"
       />
@@ -224,8 +263,8 @@ function App() {
         onReset={reset}
         canUndo={canUndo}
         canRedo={canRedo}
-        hasData={!!state.data}
-        isDirty={state.isDirty}
+        hasData={!!state.currentFile}
+        isDirty={state.isModified}
         isSharedFile={isSharedFile}
         searchQuery={state.searchQuery}
         onSearchChange={setSearchQuery}
@@ -261,8 +300,7 @@ function App() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-red-800">
-                <strong>Critical Issues Found:</strong> {validationSummary.criticalIssues.length} critical validation error{validationSummary.criticalIssues.length !== 1 ? 's' : ''} detected. 
-                Please review and fix these issues before saving.
+                <strong>Critical Issues Found:</strong> {validationSummary.criticalIssues.length} critical validation error{validationSummary.criticalIssues.length !== 1 ? 's' : ''} detected.
               </p>
             </div>
           </div>
@@ -288,9 +326,9 @@ function App() {
       )}
       
       <div className="flex-1 flex overflow-hidden relative">
-        {!state.data ? (
+        {!state.currentFile ? (
           <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
-            <FileUpload onFileUpload={handleFileUpload} className="max-w-md w-full" />
+            <UnifiedFileUpload onFileUpload={handleFileUpload} className="max-w-2xl w-full" />
           </div>
         ) : (
           <>
@@ -313,19 +351,17 @@ function App() {
               z-50 sm:z-auto
               bg-white sm:bg-transparent
             `}>
-              <TreeView
-                sections={state.data.sections}
-                selectedKey={state.selectedKey}
+              <UnifiedTreeView
+                data={state.currentFile.content}
+                fileType={state.currentFile.type}
+                selectedNode={state.selectedNode}
                 searchQuery={state.searchQuery}
-                validationErrors={state.data.validationErrors}
-                onKeySelect={handleKeySelect}
-                onToggleSection={toggleSection}
-                onAddSection={addSection}
-                onDeleteSection={deleteSection}
-                onRenameSection={renameSection}
-                onAddKey={addKey}
-                onDeleteKey={deleteKey}
-                onRenameKey={renameKey}
+                expandedPaths={state.expandedPaths}
+                onNodeSelect={handleNodeSelect}
+                onToggleExpanded={toggleExpanded}
+                onAddNode={addNode}
+                onDeleteNode={deleteNode}
+                onUpdateNode={updateNode}
               />
             </div>
             
@@ -362,7 +398,7 @@ function App() {
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    Changes ({state.changes.length})
+                    Changes ({state.changeHistory.length})
                   </button>
                 </nav>
               </div>
@@ -370,14 +406,13 @@ function App() {
               {/* Tab Content */}
               <div className="flex-1 overflow-hidden">
                 {activeTab === 'editor' ? (
-                  <EditorForm
-                    selectedKey={state.selectedKey}
-                    validationErrors={state.data.validationErrors}
-                    onSave={updateKey}
-                    onCancel={() => selectKey(null)}
+                  <UnifiedEditorForm
+                    selectedNode={selectedNodeObject}
+                    onSave={updateNode}
+                    onCancel={() => selectNode(null)}
                   />
                 ) : (
-                  <ChangeLog changes={state.changes} />
+                  <UnifiedChangeLog changes={state.changeHistory} />
                 )}
               </div>
             </div>
