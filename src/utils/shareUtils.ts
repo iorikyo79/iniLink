@@ -1,8 +1,40 @@
 import LZString from 'lz-string';
-import { ShareData } from '../types/unified';
+import { IniData } from '../types/ini';
+import { serializeIniData } from './iniParser';
 
-export function generateShareUrl(shareData: ShareData): { url: string; length: number } {
+export interface ShareData {
+  version: string;
+  timestamp: number;
+  filename: string;
+  data: string; // Serialized INI content
+}
+
+export function generateShareUrl(iniData: IniData): { url: string; length: number } {
   try {
+    // Create clean INI data without change history and comments
+    const cleanData: IniData = {
+      ...iniData,
+      sections: iniData.sections.map(section => ({
+        ...section,
+        keys: section.keys.map(key => ({
+          ...key,
+          comment: undefined, // Remove comments for sharing
+          isModified: false,  // Reset modification status
+        }))
+      }))
+    };
+
+    // Serialize the INI data
+    const serializedData = serializeIniData(cleanData);
+    
+    // Create share data object
+    const shareData: ShareData = {
+      version: '1.0',
+      timestamp: Date.now(),
+      filename: iniData.filename,
+      data: serializedData
+    };
+
     // Compress the data
     const jsonString = JSON.stringify(shareData);
     const compressed = LZString.compressToEncodedURIComponent(jsonString);
@@ -40,7 +72,7 @@ export function parseShareUrl(): ShareData | null {
     const shareData: ShareData = JSON.parse(decompressed);
     
     // Validate share data structure
-    if (!shareData.version || !shareData.content || !shareData.filename || !shareData.fileType) {
+    if (!shareData.version || !shareData.data || !shareData.filename) {
       throw new Error('Invalid share data structure');
     }
 
@@ -61,22 +93,22 @@ export function clearShareUrl(): void {
 export function validateShareData(shareData: ShareData): boolean {
   try {
     // Check required fields
-    if (!shareData.version || !shareData.content || !shareData.filename || !shareData.fileType) {
+    if (!shareData.version || !shareData.data || !shareData.filename) {
       return false;
     }
 
-    // Check file type
-    if (!['ini', 'json', 'xml'].includes(shareData.fileType)) {
+    // Check version compatibility
+    if (shareData.version !== '1.0') {
+      console.warn(`Share data version ${shareData.version} may not be fully compatible`);
+    }
+
+    // Validate timestamp
+    if (shareData.timestamp && (typeof shareData.timestamp !== 'number' || shareData.timestamp <= 0)) {
       return false;
     }
 
-    // Validate timestamp if present
-    if (shareData.metadata?.created && (typeof shareData.metadata.created !== 'string' && !(shareData.metadata.created instanceof Date))) {
-      return false;
-    }
-
-    // Try to validate content format
-    if (typeof shareData.content !== 'string' || shareData.content.trim().length === 0) {
+    // Try to validate INI data format
+    if (typeof shareData.data !== 'string' || shareData.data.trim().length === 0) {
       return false;
     }
 
@@ -84,5 +116,44 @@ export function validateShareData(shareData: ShareData): boolean {
   } catch (error) {
     console.error('Share data validation failed:', error);
     return false;
+  }
+}
+
+export function getShareUrlInfo(url: string): {
+  isValid: boolean;
+  length: number;
+  estimatedSize: number;
+  compressionRatio?: number;
+} {
+  try {
+    const urlObj = new URL(url);
+    const configParam = urlObj.searchParams.get('config');
+    
+    if (!configParam) {
+      return { isValid: false, length: url.length, estimatedSize: 0 };
+    }
+
+    // Try to decompress to get original size
+    let originalSize = 0;
+    let compressionRatio = 0;
+    
+    try {
+      const decompressed = LZString.decompressFromEncodedURIComponent(configParam);
+      if (decompressed) {
+        originalSize = decompressed.length;
+        compressionRatio = configParam.length / originalSize;
+      }
+    } catch (error) {
+      // Ignore decompression errors for info purposes
+    }
+
+    return {
+      isValid: true,
+      length: url.length,
+      estimatedSize: originalSize,
+      compressionRatio: compressionRatio > 0 ? compressionRatio : undefined
+    };
+  } catch (error) {
+    return { isValid: false, length: url.length, estimatedSize: 0 };
   }
 }

@@ -1,26 +1,20 @@
 # ConfigLink
 
-A professional web-based configuration file editor supporting **INI**, **JSON**, and **XML** formats with advanced features including change tracking, validation, sharing capabilities, and real-time editing.
+A professional web-based INI file editor with advanced features including change tracking, validation, sharing capabilities, and real-time editing.
 
 ![ConfigLink](https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1200&h=400&fit=crop)
 
 ## ✨ Features
 
-### 📝 Multi-Format Support
-- **INI Files**: Traditional configuration files with sections and key-value pairs
-- **JSON Files**: JavaScript Object Notation with full object/array support
-- **XML Files**: Extensible Markup Language with hierarchical structure
-- **Universal Parser**: Automatic file type detection and format-specific validation
-
-### 🔍 Advanced Editing
-- **Unified Tree Structure**: Navigate all file types with an intuitive tree view
+### 📝 Core Editing
+- **Visual Tree Structure**: Navigate INI files with an intuitive tree view
 - **Real-time Validation**: Instant feedback on syntax errors and data type issues
-- **Smart Type Detection**: Automatic detection of strings, numbers, booleans, objects, and arrays
+- **Smart Type Detection**: Automatic detection of strings, numbers, and booleans
 - **Inline Editing**: Edit values directly with type-specific input controls
 
 ### 🔍 Advanced Search & Filtering
-- **Global Search**: Search across all nodes and values
-- **Node Filtering**: Filter nodes by name in the tree view
+- **Global Search**: Search across all sections and keys
+- **Section Filtering**: Filter sections by name in the tree view
 - **Modified Items Filter**: View only changed items with a single click
 - **Search Highlighting**: Visual highlighting of search matches
 
@@ -32,28 +26,21 @@ A professional web-based configuration file editor supporting **INI**, **JSON**,
 
 ### 🔗 Sharing & Collaboration
 - **URL Sharing**: Share configurations via compressed URLs
-- **Multi-Format Support**: Share any supported file format
 - **No Server Required**: All data embedded in the URL for privacy
 - **Cross-platform**: Works on any device with a web browser
-- **Import/Export**: Standard file format support
+- **Import/Export**: Standard INI file format support
 
 ### ✅ Validation & Quality
-- **Format-Specific Validation**: Real-time syntax checking for each file type
+- **Syntax Validation**: Real-time INI syntax checking
+- **Duplicate Detection**: Identify duplicate keys and sections
 - **Type Validation**: Ensure values match their expected types
-- **Error Reporting**: Detailed error messages with path information
-- **Data Sanitization**: Input sanitization for security
+- **Error Reporting**: Detailed error messages with line numbers
 
 ### 📱 Mobile Responsive
 - **Touch-Friendly UI**: Optimized for mobile devices with proper touch targets
 - **Collapsible Sidebar**: Mobile-friendly navigation with hamburger menu
 - **Smooth Scrolling**: Auto-scroll to inputs on mobile for better UX
 - **Responsive Design**: Adapts to all screen sizes from mobile to desktop
-
-### 🔒 Security Features
-- **Input Sanitization**: All input data is sanitized to prevent XSS attacks
-- **Client-Side Processing**: No data sent to external servers
-- **File Size Limits**: 10MB maximum file size for performance
-- **Content Validation**: Comprehensive validation before processing
 
 ## 🚀 Getting Started
 
@@ -92,17 +79,16 @@ The built files will be in the `dist` directory.
 
 ## 📖 Usage Guide
 
-### Loading Configuration Files
-1. **Drag & Drop**: Simply drag a configuration file onto the upload area
-2. **File Browser**: Click "Choose File" to browse and select a file
+### Loading INI Files
+1. **Drag & Drop**: Simply drag an INI file onto the upload area
+2. **File Browser**: Click "Choose File" to browse and select an INI file
 3. **Shared URLs**: Open shared configuration URLs directly
-4. **Supported Formats**: INI, JSON, XML, CFG, CONF, CONFIG, TXT
 
 ### Editing Configuration
-1. **Navigate**: Use the tree view to browse nodes and values
-2. **Select**: Click on any node to open the editor panel
+1. **Navigate**: Use the tree view to browse sections and keys
+2. **Select**: Click on any key to open the editor panel
 3. **Edit**: Modify values using type-appropriate controls
-4. **Data Types**: Support for string, number, boolean, object, array, and null types
+4. **Save**: Click "Save Changes" to apply modifications
 
 ### Managing Changes
 - **View Changes**: Switch to the "Changes" tab to see all modifications
@@ -114,11 +100,10 @@ The built files will be in the `dist` directory.
 1. **Click Share**: Use the "Share" button in the toolbar
 2. **Copy URL**: Copy the generated URL to share with others
 3. **Test**: Use "Test URL" to verify the link works correctly
-4. **Multi-Format**: Works with all supported file formats
 
 ### Search & Filter
-- **Global Search**: Use the toolbar search to find nodes across the entire structure
-- **Node Filter**: Use the tree view filter to find specific nodes
+- **Global Search**: Use the toolbar search to find keys across all sections
+- **Section Filter**: Use the tree view filter to find specific sections
 - **Modified Filter**: Toggle "Show Modified Only" to focus on changes
 
 ### Mobile Usage
@@ -137,36 +122,26 @@ The built files will be in the `dist` directory.
 
 ### Key Libraries
 - **ini**: INI file parsing and serialization
-- **xml2js**: XML parsing and conversion
-- **js-beautify**: Code formatting and beautification
 - **lz-string**: URL-safe compression for sharing
+- **React Hooks**: State management and side effects
 
 ### Architecture
 ```
 src/
 ├── components/          # React components
-│   ├── UnifiedTreeView.tsx      # Universal tree navigation
-│   ├── UnifiedEditorForm.tsx    # Multi-type value editing
-│   ├── UnifiedChangeLog.tsx     # Change history display
-│   ├── UnifiedFileUpload.tsx    # Multi-format file upload
-│   ├── ShareModal.tsx           # URL sharing functionality
-│   └── Toolbar.tsx              # Main toolbar with actions
+│   ├── TreeView.tsx    # File structure navigation
+│   ├── EditorForm.tsx  # Key-value editing interface
+│   ├── ChangeLog.tsx   # Change history display
+│   ├── ShareModal.tsx  # URL sharing functionality
+│   ├── Toolbar.tsx     # Main toolbar with actions
+│   └── FileUpload.tsx  # File upload interface
 ├── hooks/              # Custom React hooks
-│   └── useUnifiedEditor.ts      # Main editor state management
+│   └── useIniEditor.ts # Main editor state management
 ├── utils/              # Utility functions
-│   ├── fileProcessor.ts         # File processing pipeline
-│   ├── validation.ts            # Validation engine
-│   ├── parsers/                 # Format-specific parsers
-│   │   ├── iniParser.ts
-│   │   ├── jsonParser.ts
-│   │   └── xmlParser.ts
-│   ├── serializers/             # Format-specific serializers
-│   │   ├── iniSerializer.ts
-│   │   ├── jsonSerializer.ts
-│   │   └── xmlSerializer.ts
-│   └── shareUtils.ts            # URL sharing utilities
+│   ├── iniParser.ts    # INI parsing and validation
+│   └── shareUtils.ts   # URL sharing utilities
 ├── types/              # TypeScript type definitions
-│   └── unified.ts               # Unified data structures
+│   └── ini.ts          # INI data structures
 └── App.tsx             # Main application component
 ```
 
@@ -183,63 +158,19 @@ No environment variables required - the application runs entirely client-side.
 
 ## 📝 File Format Support
 
-### INI Files
+### Supported INI Features
 - **Sections**: `[section_name]`
 - **Key-Value Pairs**: `key=value`
 - **Comments**: `;` and `#` style comments
 - **Data Types**: Automatic detection of strings, numbers, booleans
-
-### JSON Files
-- **Objects**: Nested object structures
-- **Arrays**: Array data with indexed access
-- **Primitives**: Strings, numbers, booleans, null
-- **Validation**: Full JSON syntax validation
-
-### XML Files
-- **Elements**: Hierarchical element structure
-- **Attributes**: Element attributes support
-- **Text Content**: Element text content
-- **Namespaces**: Basic namespace support
+- **Boolean Values**: `true/false`, `1/0`, `yes/no`, `on/off`
 
 ### Validation Rules
-- Format-specific syntax validation
-- Data type validation and conversion
-- File size limits (10MB maximum)
-- Input sanitization for security
-
-## 🔒 Security Considerations
-
-### Input Sanitization
-- All file content is sanitized before processing
-- XSS prevention through content filtering
-- Script tag removal and dangerous content blocking
-
-### Data Privacy
-- No data sent to external servers
-- All processing happens client-side
-- Share URLs contain compressed data only
-
-### File Validation
-- File size limits enforced
-- Content type validation
-- Malicious content detection
-
-## ⚡ Performance Optimization
-
-### Lazy Loading
-- Parser modules loaded on demand
-- Large file handling with virtual scrolling
-- Efficient memory management
-
-### Caching
-- Parsed results cached for performance
-- Validation results memoized
-- Search results optimized
-
-### Compression
-- Share URLs use LZ-String compression
-- Efficient data serialization
-- Minimal payload sizes
+- Section names cannot be empty or contain `[]` characters
+- Key names cannot be empty or contain `=[]` characters
+- Boolean values must use recognized formats
+- Numbers must be finite and valid
+- No duplicate keys within sections
 
 ## 🤝 Contributing
 
@@ -247,11 +178,10 @@ No environment variables required - the application runs entirely client-side.
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes
-4. Run tests: `npm run test`
-5. Run linting: `npm run lint`
-6. Commit changes: `git commit -m 'Add amazing feature'`
-7. Push to branch: `git push origin feature/amazing-feature`
-8. Open a Pull Request
+4. Run tests: `npm run lint`
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
 
 ### Code Style
 - Use TypeScript for all new code
@@ -259,12 +189,6 @@ No environment variables required - the application runs entirely client-side.
 - Add proper type definitions
 - Include error handling
 - Write descriptive commit messages
-
-### Testing
-- Unit tests for parsers and serializers
-- Integration tests for file processing
-- Validation tests for all supported formats
-- Error boundary testing
 
 ## 📄 License
 
@@ -276,7 +200,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Lucide](https://lucide.dev) for beautiful icons
 - [Tailwind CSS](https://tailwindcss.com) for styling utilities
 - [Vite](https://vitejs.dev) for build tooling
-- [xml2js](https://github.com/Leonidas-from-XIV/node-xml2js) for XML parsing
 
 ## 📞 Support
 
@@ -289,27 +212,21 @@ If you encounter any issues or have questions:
 ## 🗺️ Roadmap
 
 ### Upcoming Features
-- [ ] YAML format support
-- [ ] TOML format support
+- [ ] Multiple file support
 - [ ] Advanced validation rules
-- [ ] Export to different formats
+- [ ] Export to different formats (JSON, YAML)
 - [ ] Syntax highlighting
 - [ ] Keyboard shortcuts
 - [ ] Dark mode theme
 - [ ] Collaborative editing
 - [ ] Plugin system
-- [ ] API integration
-- [ ] Batch file processing
 
 ### Version History
-- **v2.0.0**: Multi-format support (INI, JSON, XML) with unified editor
-- **v1.3.0**: Mobile responsive design and touch optimization
-- **v1.2.0**: Enhanced search and filtering capabilities
+- **v1.0.0**: Initial release with core editing features
 - **v1.1.0**: Added sharing functionality and validation
-- **v1.0.0**: Initial release with INI editing features
+- **v1.2.0**: Enhanced search and filtering capabilities
+- **v1.3.0**: Mobile responsive design and touch optimization
 
 ---
 
 **Made with ❤️ for the developer community**
-
-*ConfigLink - Your Universal Configuration Management Solution*
