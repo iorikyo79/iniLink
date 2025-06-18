@@ -32,6 +32,8 @@ export function useUnifiedEditor() {
       
       // Detect file type and parse
       const fileType = fileProcessor.detectFileType(file);
+      
+      // Parse content (now properly handling async XML parsing)
       const parsedContent = await fileProcessor.parseContent(sanitizedContent, fileType, file.name);
       
       // Create new state
@@ -53,6 +55,7 @@ export function useUnifiedEditor() {
         historyIndex: 0,
       }));
     } catch (error) {
+      console.error('File loading error:', error);
       throw error;
     }
   }, [fileProcessor]);
